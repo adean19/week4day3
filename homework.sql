@@ -25,14 +25,14 @@ FROM (
 ) AS customer_payments
 WHERE amount > 175
 
--- 4. List all customers that live in Nepal (use the city table)  **
+-- 4. List all customers that live in Nepal (use the city table)
 SELECT first_name, last_name, country
 FROM customer
 INNER JOIN address
 ON customer.address_id = address.address_id
 INNER JOIN city
 ON address.city_id = city.city_id
-INNER JOIN LATERAL(
+INNER JOIN LATERAL (
     SELECT country
     FROM country
     WHERE city.country_id = country.country_id) profiles ON true
@@ -74,3 +74,15 @@ WHERE customer.customer_id IN (
 SELECT *
 FROM payment
 WHERE amount = 0
+
+-- 9. Which staff member has the most negative transactions?
+
+SELECT first_name, last_name, staff.staff_id, count(rental.rental_id)
+FROM staff
+INNER JOIN rental
+ON staff.staff_id = rental.staff_id
+INNER JOIN payment
+ON rental.rental_id = payment.rental_id
+WHERE payment.amount < 0
+GROUP BY first_name, last_name, staff.staff_id
+ORDER BY count(rental.rental_id) DESC;
