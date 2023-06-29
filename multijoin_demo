@@ -1,0 +1,93 @@
+SELECT *
+FROM film;
+
+SELECT *
+FROM film_actor;
+
+SELECT *
+FROM actor;
+
+SELECT *
+FROM rental;
+
+
+-- Multijoin
+SELECT *
+FROM film
+INNER JOIN film_actor
+ON film.film_id = film_actor.film_id
+INNER JOIN actor
+ON actor.actor_id = film_actor.actor_id
+
+-- add on constraint/filters
+SELECT title, first_name, last_name
+FROM film
+INNER JOIN film_actor
+ON film.film_id = film_actor.film_id
+INNER JOIN actor
+ON actor.actor_id = film_actor.actor_id
+WHERE title LIKE 'B%'
+ORDER BY film.film_id ASC;
+
+-- subquery
+-- two queries split apart that later become one
+-- query 1 looks through payment table and finds customers who spent > 100:
+SELECT customer_id
+FROM payment
+WHERE amount > 0
+GROUP BY customer_id
+HAVING sum(payment.amount) > 100
+ORDER BY sum(payment.amount) DESC;
+-- query 2 get customer info based on a given id
+SELECT first_name, last_name, email
+FROM customer;
+
+-- combo
+-- sub queries can happen at SLECT, FROM, and WHERE
+-- WHERE clause subquery
+SELECT first_name, last_name, email
+FROM customer
+WHERE customer_id IN (
+    SELECT customer_id
+    FROM payment
+    WHERE amount > 0
+    GROUP BY customer_id
+    HAVING sum(payment.amount) > 100
+    ORDER BY sum(payment.amount) DESC
+);
+
+-- FROM clause subquery
+-- get all actors who acted in mulan moon
+SELECT *
+FROM film
+INNER JOIN film_actor
+ON film.film_id = film_actor.film_id
+INNER JOIN actor
+ON actor.actor_id = film_actor.actor_id
+WHERE title LIKE 'M%'
+
+SELECT first_name, last_name
+FROM (
+    SELECT *
+    FROM film
+    INNER JOIN film_actor
+    ON film.film_id = film_actor.film_id
+    INNER JOIN actor
+    ON actor.actor_id = film_actor.actor_id
+    WHERE title LIKE 'M%'
+) AS m_movies
+WHERE title = 'Mulan Moon';
+
+-- SELECT CLAUSE SUB QUERY
+-- not the most useful
+
+SELECT first_name, last_name, (
+    SELECT COUNT (*)
+    FROM rental
+)
+FROM customer;
+
+-- When Subquerying in SELECT, you'll get a single cell that will repeat
+-- When subquerying in FROM, you'll get back a table
+-- When subquerying in WHERE, you'll get back a column
+
